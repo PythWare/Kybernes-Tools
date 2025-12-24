@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 22 2025 only Wild Liberd is added but Kybernes Scanner (used for WBD/WBH wrapped files such as in Orochi 3's case or loose paired WBD/WBH files like for Bladestorm Nightmare), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), and other Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), and other Editors/Tools will be added here at later dates.
 
 # Wild Liberd, G1L Tool
 
