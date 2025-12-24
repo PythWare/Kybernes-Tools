@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), and other Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
 
 # Wild Liberd, G1L Tool
 
@@ -66,6 +66,13 @@ Festum Conversion
 <img width="991" height="708" alt="f1" src="https://github.com/user-attachments/assets/6d7eab79-bda4-47d7-9c0d-5603b6779c11" />
 
 <img width="984" height="702" alt="f2" src="https://github.com/user-attachments/assets/a9b17076-80b3-43bf-8f0e-24c7c039664e" />
+
+G1T Krieger
+
+<img width="1113" height="788" alt="k11" src="https://github.com/user-attachments/assets/20070dd3-13b0-4ed5-990a-c107a5a1a507" />
+
+<img width="1108" height="783" alt="k16" src="https://github.com/user-attachments/assets/dbd76210-1830-4e6f-9579-4b8695f3a345" />
+
 
 U-Link System
 
