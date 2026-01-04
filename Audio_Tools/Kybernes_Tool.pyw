@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 DECODE_MSADPCM_TO_PCM_WAV = True  # recommended for maximum WAV player compatibility
 
 
