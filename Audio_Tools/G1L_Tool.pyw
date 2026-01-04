@@ -1,6 +1,8 @@
 import os, struct, threading, queue, tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 # G1L/KOVS constants
 
 G1L_SIG = bytes.fromhex("5F 4C 31 47 30 30 30 30")  # _L1G0000
