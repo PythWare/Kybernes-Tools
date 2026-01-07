@@ -12,6 +12,10 @@ Wild Liberd supports dynamic file sizes for user songs, you don't have to have t
 
 <img width="910" height="647" alt="k2" src="https://github.com/user-attachments/assets/897e48e2-a6f9-4b02-8776-cca7a81f309c" />
 
+<img width="912" height="647" alt="u40" src="https://github.com/user-attachments/assets/e02b976b-db62-4691-99f4-afd3c6844ef6" />
+
+<img width="915" height="654" alt="u41" src="https://github.com/user-attachments/assets/3c7a55aa-f859-4da9-adcd-993acad31ec2" />
+
 # Uses For Wild Liberd
 
 Wild Liberd is good if you want to replace BGMS with your own music, you could replace every file within the G1L with your chosen music and the game will load it. Review Audio Modding section.
