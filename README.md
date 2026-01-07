@@ -1,10 +1,10 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but U-Link System Stage Editor (Stage/Battlefield Editor for Dynasty Warriors 8 XL, Dynasty Warriors 7 XL, Dynasty Warriors 6, Samurai Warriors 2), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
 
 # Wild Liberd, G1L Tool
 
-Wild Liberd is a Standalone GUI batch (can scan subdirectories too) G1L Unpacker/Repacker for G1L files that store KOVS/KTSS files, tested on Warriors Orochi 3 (I replaced BGMS with custom ones from my favorite singers/anime opening songs). I don't guarentee it works for every Koei Tecmo game, sometimes Omega Force stores other audio formats within G1L containers but I know it works for Warriors Orochi 3. If you try it on other games, it should unpack without issue unless it detects a signature that isn't KOVS/KTSS since Wild Liberd is in an early state. I'll continue updating it to support other formats (for example, Bladestorm Nightmare has files with RIFF signatures in some of the G1L files so i'll need to add support for that later on).
+Wild Liberd is a Standalone GUI batch (can scan subdirectories too) G1L Unpacker/Repacker for G1L files that store KOVS/KTSS files, tested on Warriors Orochi 3 (I replaced BGMS with custom ones from my favorite singers/anime opening songs). I don't guarentee it works for every Koei Tecmo game, sometimes Omega Force stores other audio formats within G1L containers but I know it works for Warriors Orochi 3 and Dynasty Warriors 7 XL. If you try it on other games, it should unpack without issue unless it detects a signature that isn't KOVS/KTSS since Wild Liberd is in an early state. I'll continue updating it to support other formats (for example, Bladestorm Nightmare has files with RIFF signatures in some of the G1L files so i'll need to add support for that later on).
 
 Wild Liberd supports dynamic file sizes for user songs, you don't have to have the same file size as the bgms you want to replace. Your music can be smaller/larger than the original KOVS/KTSS files.
 
@@ -60,6 +60,15 @@ Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .
 The names of the tools are references to my favorite mecha animes Aldnoah Zero, Argevollen, and Fafner. Rad animes!
 
 # Future Tools
+
+U-Link System Stage Editor
+<img width="1234" height="644" alt="u21" src="https://github.com/user-attachments/assets/4a7e803e-2abe-45ae-ad94-73e0c5550678" />
+<img width="1089" height="725" alt="u23" src="https://github.com/user-attachments/assets/f7b38d12-bc9b-4962-91ec-260ccd6f2c1b" />
+<img width="1710" height="729" alt="u33" src="https://github.com/user-attachments/assets/d1ed5e7a-4cf8-469b-b55e-c3e2ab3922e5" />
+<img width="949" height="526" alt="u38" src="https://github.com/user-attachments/assets/6d31722e-1996-415a-82a2-ae48287b9f56" />
+<img width="1095" height="724" alt="u39" src="https://github.com/user-attachments/assets/48674be1-5e4c-41fc-b60d-085cced81ed6" />
+
+
 
 Festum Conversion
 
