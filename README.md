@@ -4,7 +4,7 @@ This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo
 
 # Wild Liberd, G1L Tool
 
-Wild Liberd is a Standalone GUI batch (can scan subdirectories too) G1L Unpacker/Repacker for G1L files that store KOVS/KTSS files, tested on Warriors Orochi 3 (I replaced BGMS with custom ones from my favorite singers/anime opening songs) and Dynasty Warriors 7 XL. I don't guarentee it works for every Koei Tecmo game, sometimes Omega Force stores other audio formats within G1L containers but I know it works for Warriors Orochi 3 and Dynasty Warriors 7 XL. If you try it on other games, it should unpack without issue unless it detects a signature that isn't KOVS/KTSS since Wild Liberd is in an early state. I'll continue updating it to support other formats (for example, Bladestorm Nightmare has files with RIFF signatures in some of the G1L files so i'll need to add support for that later on).
+Wild Liberd is a Standalone GUI batch (can scan subdirectories too) G1L Unpacker/Repacker for G1L files that store KOVS/KTSS files, tested on Warriors Orochi 3 (I replaced BGMS with custom ones from my favorite singers/anime opening songs), Dynasty Warriors 7 XL, Toukiden Kiwami. I don't guarentee it works for every Koei Tecmo game, sometimes Omega Force stores other audio formats within G1L containers but I know it works for Warriors Orochi 3, Toukiden Kiwamim, and Dynasty Warriors 7 XL. If you try it on other games, it should unpack without issue unless it detects a signature that isn't KOVS/KTSS since Wild Liberd is in an early state. I'll continue updating it to support other formats (for example, Bladestorm Nightmare has files with RIFF signatures in some of the G1L files so i'll need to add support for that later on).
 
 Wild Liberd supports dynamic file sizes for user songs, you don't have to have the same file size as the bgms you want to replace. Your music can be smaller/larger than the original KOVS/KTSS files.
 
@@ -15,6 +15,10 @@ Wild Liberd supports dynamic file sizes for user songs, you don't have to have t
 <img width="912" height="647" alt="u40" src="https://github.com/user-attachments/assets/e02b976b-db62-4691-99f4-afd3c6844ef6" />
 
 <img width="915" height="654" alt="u41" src="https://github.com/user-attachments/assets/3c7a55aa-f859-4da9-adcd-993acad31ec2" />
+
+<img width="918" height="650" alt="wl1" src="https://github.com/user-attachments/assets/ac04e054-2dba-49b9-83e0-7e245cc4d03d" />
+
+<img width="920" height="647" alt="wl2" src="https://github.com/user-attachments/assets/e1001230-98f6-4add-ae88-4b8078ce8804" />
 
 # Uses For Wild Liberd
 
