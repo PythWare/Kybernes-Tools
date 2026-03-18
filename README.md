@@ -1,6 +1,23 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of December 24 2025 only Wild Liberd and Kybernes Scanner are added but U-Link System Stage Editor (Stage/Battlefield Editor for Dynasty Warriors 8 XL, Dynasty Warriors 7 XL, Dynasty Warriors 6, Samurai Warriors 2), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 3 2026 only Harklight, Wild Liberd, and Kybernes Scanner are added but U-Link System Stage Editor (Stage/Battlefield Editor for Dynasty Warriors 8 XL, Dynasty Warriors 7 XL, Dynasty Warriors 6, Samurai Warriors 2), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
+
+# Harklight, KVS Audio Tool
+
+Harklight is meant to be used with Aldnoah Engine (since AE handles subcontainer rebuilding which a lot of KVS files are stored in) but it has standalone usage. Harklight can decrypt KVS files to playable Oggs, convert Oggs to valid KVS files, and has a rad custom GUI all done in Python. It supports single or batch usage.
+
+<img width="1909" height="1032" alt="kv1" src="https://github.com/user-attachments/assets/f50e7db1-c3a4-4959-af3e-579cb1d7303b" />
+<img width="1909" height="1037" alt="kv2" src="https://github.com/user-attachments/assets/d3d5314e-9cec-4dbb-a70c-dad02d844958" />
+<img width="1914" height="1035" alt="kv3" src="https://github.com/user-attachments/assets/ebb33ffe-1f26-408c-b8c9-a9984fcfa2db" />
+<img width="1907" height="1036" alt="kv4" src="https://github.com/user-attachments/assets/41cc1d39-98e3-4bff-9a1d-d4e5224a3b99" />
+
+# Uses for Harklight
+
+KVS is for a lot of Koei Tecmo games the encrypted ogg format they use for voiced audio and other various things like bgm, sounds, etc. This tool is free and written in Python with no dependencies beyond having a python 3 installation.
+
+# Audio modding with Harklight
+
+Use Harklight for converting KVS to ogg and vice versa, then when you need to apply your new audio mods use Aldnoah Engine to rebuild the KVS subcontainers. If you're dealing with loose KVS files that were not part of a subcontainer then you don't have to use AE's subcontainer rebuilding
 
 # Wild Liberd, G1L Tool
 
@@ -26,9 +43,9 @@ Wild Liberd is good if you want to replace BGMS with your own music, you could r
 
 # Audio Modding With Wild Liberd
 
-Wild Liberd Unpacks/Repacks G1L files but you still have to convert your music you want to a format the game expects which in orochi 3's case and any other G1L format that stores KOVS/KTSS files, is KOVS/KTSS. To do that, I recommend downloading kvs2ogg from the musou warriors discord server in the resources-and-other channel. kvs2ogg can convert mp3, wav, and ogg to kvs and vice versa.
+Wild Liberd Unpacks/Repacks G1L files but you still have to convert your music you want to a format the game expects which in orochi 3's case and any other G1L format that stores KOVS/KTSS files, is KOVS/KTSS. Use Harklight for KOVS/KVS usage.
 
-To use with Wild Liberd, convert the songs you want to KVS with kvs2ogg and place them in the unpacked folder of the G1L that you want to repack but your songs must be named after the original KVS files you want to replace. You need to replace the KVS files with yours with matching names (i.e., if I want animesong.ogg to be played ingame then I need to convert to KVS with kvs2ogg and then replace 00000.kvs in the G1L folder with animesong.kvs renamed to 00000.kvs). Before clicking repack, select the G1L file you want to repack (listed in the GUI as "Original G1L File". The number of .kvs files must match original toc_count (meaning if the G1L unpacks with 226 files, you must only repack with the same amount of files). .kvs files must be named 00000.kvs, 00001.kvs, etc (5 digit names).
+To use with Wild Liberd, convert the songs you want to KVS with Harklight and place them in the unpacked folder of the G1L that you want to repack but your songs must be named after the original KVS files you want to replace. You need to replace the KVS files with yours with matching names (i.e., if I want animesong.ogg to be played ingame then I need to convert to KVS with kvs2ogg and then replace 00000.kvs in the G1L folder with animesong.kvs renamed to 00000.kvs). Before clicking repack, select the G1L file you want to repack (listed in the GUI as "Original G1L File". The number of .kvs files must match original toc_count (meaning if the G1L unpacks with 226 files, you must only repack with the same amount of files). .kvs files must be named 00000.kvs, 00001.kvs, etc (5 digit names).
 
 # Kybernes Scanner
 
