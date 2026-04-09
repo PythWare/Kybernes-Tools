@@ -2,7 +2,7 @@
 
 I am no longer using github, I am now using Gitlab. If you want the latest versions of Kybernes Tools then you should keep an eye on the gitlab repository instead [https://gitlab.com/PythWare/aldnoah-engine](https://gitlab.com/PythWare/kybernes-tools)
 
-The github version of Kybernes Tools is not the current version of Kybernes Tools
+The github version of Kybernes Tools is not the current version of Kybernes Tools, instead rely on gitlab version going forward.
 
 # Kybernes Tools
 
