@@ -1,3 +1,9 @@
+# Update
+
+I am no longer using github, I am now using Gitlab. If you want the latest versions of Kybernes Tools then you should keep an eye on the gitlab repository instead [https://gitlab.com/PythWare/aldnoah-engine](https://gitlab.com/PythWare/kybernes-tools)
+
+The github version of Kybernes Tools is not the current version of Kybernes Tools
+
 # Kybernes Tools
 
 This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 18 2026 only Harklight, Wild Liberd, and Kybernes Scanner are added but U-Link System Stage Editor (Stage/Battlefield Editor for Dynasty Warriors 8 XL, Dynasty Warriors 7 XL, Dynasty Warriors 6, Samurai Warriors 2), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
