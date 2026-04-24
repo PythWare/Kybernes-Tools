@@ -1,0 +1,50 @@
+WO3 Steel Unit Editor is a standalone Unit Data Editor that doesn't require Aldnoah Engine.
+
+What's required to use:
+
+Python 3 installation, if you have python 3 installed you should be able to double click the pyw file and it'll run.
+
+What can it do:
+
+It mods unit data from LINKFILE_000.BIN, that's the container that stores the unit data file. Steel Unit Editor doesn't require an unpacked game only selecting
+the correct BIN file in the game's directory.
+
+Not every field is known for unit data as of 3/28/2026 but you can edit field names (and of course unknown field values) and export/import the field names you choose so that they're saved.
+
+Each Button/UI piece explained for the toolbar:
+
+Open BIN has a popup asking for the directory of the BIN.
+
+Load Mod allows you to load the unit data from a mod file (a unit data mod file you/others create)
+
+Save Mod turns your unit data mod into a file mod incase you want to have separate mods to use whenever you want.
+
+Apply BIN applies the current unit data loaded in Steel Unit Editor to the BIN.
+
+Restore BIN reverts the modded LINKFILE_000.BIN file by writing the backup unit data to the BIN file. It essentially disables unit data mods by writing the vanilla values.
+
+Refresh resets all the slot values to default values, you'd use this after clicking Restore BIN if you want fresh unmodded values.
+
+Export Names creates a json that stores all the current field names, this is useful if you want to change the name of the fields especially if you discover the unknown values.
+
+Import Names imports the json that stores current field names, setting the field names in Steel Editor to what the json says.
+
+Slot / Range bar is incase you want to filter to a specific slot, type the number of the slot you want to edit and it'll take you to it so you don't have to scroll through 2,206 slots. Use the go button or press enter after typing a slot number. you can even multi-select by typing something like 0-100 and all slots will be selected.
+
+Set Width and the dropdown/entry with it affects the width of the cells. So if you want longer name display, update the width of whichever fields you want.
+
+Field Explaining:
+
+You can group/sort by clicking the symbol underneath each field name, doing it for the Slot piece resets the order back to the default.
+
+Multi-Select:
+
+To multi-select you can do it through the filter bar or hold the shift button and click on a starting slot and then click on the final/whatever slot (i.e., click slot 0 then with shift button held click on slot 2,206 to multi-select all slots). Another way to select all slots is typing 0-2205 (or to get exact ones an example is 100-1865, start slot-end slot is basically what that range does) in the Slot / Range bar. You can also click Ctrl + a to select all slots.
+
+When multiple slots are selected the Multi-Slot Editor popsup. Any field that has varying values is assigned "Mixed Value" while any fields with the same values display the value they share. To mod all the selected slots, change Mixed Value to whatever value you want that the field supports (some fields are 1 or 2 bytes long) and any shared value fields can be changed the same way as Mixed Values. You can press enter after setting the value you want or type the value and then click Apply To Selection if preferred.
+
+Use reload button if you want to revert the changes from multi-slot modding while within multi-slot editor.
+
+Scrollbar:
+
+Steel Unit Editor uses a custom scrollbar, instead of a bar it's a steel knob/ball. it works the same as a regular scrollbar.

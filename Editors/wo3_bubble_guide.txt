@@ -1,0 +1,62 @@
+WO3 Bubble Unit Data Editor is a standalone Editor that doesn't require Aldnoah Engine. It was an attempt to explore a wild idea I had for a GUI, bubbles and no dropdown lists.
+
+What's required to use:
+
+Python 3 installation, if you have python 3 installed you should be able to double click the pyw file and it'll run.
+
+What can it do:
+
+It mods unit data from LINKFILE_000.BIN, that's the container that stores the unit data file. Bubble Unit Editor doesn't require an unpacked game only selecting
+the correct BIN file in the game's directory.
+
+Not every field is known for unit data as of 3/28/2026.
+
+Each Button/UI piece explained for the toolbar:
+
+Open BIN has a popup asking for the directory of the BIN.
+
+Load Mod allows you to load the unit data from a mod file (a unit data mod file you/others create)
+
+Save Mod As turns your unit data mod into a file mod incase you want to have separate mods to use whenever you want.
+
+Load Saved loads the unit data mod files created.
+
+Apply Current applies the current unit data loaded in Bubble Unit Editor to the BIN.
+
+Apply Saved applies the current unit data from the unit data mod file loaded to the BIN.
+
+Restore Backup reverts the modded LINKFILE_000.BIN file by writing the backup unit data to the BIN file. It essentially disables unit data mods by writing the vanilla values.
+
+Slot / Range bar is incase you want to filter to a specific slot, type the number of the slot you want to edit and it'll take you to it so you don't have to scroll through 2,206 slots. Use the go button or press enter after typing a slot number. you can even multi-select by typing something like 0-100 and all slots will be selected.
+
+Clear closes the Slot Editor popup.
+
+Invert flips the current selection. Every unselected slot becomes selected and every selected slot is cleared.
+
+Changed takes you to the modded bubbles whether it's a single bubble you modded or multiple through multi-select.
+
+Prev Mod/Next Mod load different unit data mod files that exist.
+
+Refresh resets all the slot values to default values, you'd use this after clicking Restore Backup if you want fresh unmodded values.
+
+Field Explaining:
+
+Fields that are known have a useful name while unknown ones are labeled unknown.
+
+You can edit field names within a bubble, make sure to click Update Field Names to save the field names you desire.
+
+Slot Editor/Multi-Select:
+
+To multi-select you can do it through the filter bar or click and hold as you drag over bubbles. I'd use the filter bar if you want to select all slots since Bubble editor is set to display bubbles gradually to not have performance issues, so hold and drag only goes over the visible bubbles while filter bar can grab all bubbles based on what you filter for.
+
+When multiple bubbles are selected the Slot Editor popsup. Any field that has varying values is assigned "Mixed Value" while any fields with the same values display the value they share. To mod the selected slots, change Mixed Value to whatever value you want that the field supports (some fields are 1 or 2 bytes long) and any shared value fields can be changed the same way as Mixed Values. You can press enter after setting the value you want or type the value and then click Apply To Selection if preferred.
+
+Use Reload Fields button if you want to revert the changes from multi-slot modding while within multi-slot editor.
+
+Prev/Next Slot buttons change the current bubble being modded.
+
+Close Editor closes the Slot Editor.
+
+Scrollbar:
+
+Bubble Unit Editor uses a custom scrollbar, instead of a bar it's a Lilac Bubble (inspired by Yang Xiao Long's eyes). it works the same as a regular scrollbar.
