@@ -1,12 +1,10 @@
-# Update
-
-I am no longer using github, I am now using Gitlab. If you want the latest versions of Kybernes Tools then you should keep an eye on the gitlab repository instead [https://gitlab.com/PythWare/aldnoah-engine](https://gitlab.com/PythWare/kybernes-tools)
-
-The github version of Kybernes Tools is not the current version of Kybernes Tools, instead rely on gitlab version going forward.
-
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 18 2026 only Harklight, Wild Liberd, and Kybernes Scanner are added but U-Link System Stage Editor (Stage/Battlefield Editor for Dynasty Warriors 8 XL, Dynasty Warriors 7 XL, Dynasty Warriors 6, Samurai Warriors 2), Silver Will (Unit Editor for Bladestorm), U-Link System (unit editor for Orochi 3), Festum Converson (translation/string editing tool), G1T Krieger (G1T Viewer/Converter tool), and other Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, and Kybernes Scanner are added but future Editors/Tools will be added here at later dates.
+
+# Requirements to use my tools
+
+Only a Python 3 installation, if a tool needs something like Pillow (python imaging library) then the tool's section will say it in the readme.
 
 # Harklight, KVS Audio Tool
 
@@ -85,6 +83,32 @@ Repack Guide:
 
 Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .bin. Use Aldnoah Engine's Mod Manager to apply/disable mods.
 
+# Steel/Bubble Unit Editors for Warriors Orochi 3
+
+These standalone editors mod warriors orochi 3's LINKFILE_000.BIN file, both editors don't require the game to be unpacked. Make sure to read the text files within the Editors folder for how to use. As time goes on more fields will be discovered and i'll update the editors with more features/field names.
+
+Credit goes to Michael for identifying some of the fields in the Unit Data, their lengths, and finding the Unit Names. Credit also goes to KanbeiKS7 for giving me permission to include documentation files of values (WO3DE_Models, WO3DE_Moveset, WO3DE_Voices).
+Credit also goes to LunaMeiya for identifying the Costume ID field.
+
+Steel Editor has more features than Bubble Editor for now until I have time to work on the Bubble Editor, the feature that Steel Editor has over Bubble Editor is fields can have names displayed with the values. I'll add this to Bubble Editor at a later date.
+
+<img width="1919" height="1034" alt="bu1" src="https://github.com/user-attachments/assets/c2c7629f-2cfc-4efa-9f0b-ab8c53f7e1a0" />
+
+<img width="1916" height="1041" alt="bu2" src="https://github.com/user-attachments/assets/e8dab084-ff1e-4bcd-832e-6c47482a542a" />
+
+<img width="1907" height="1033" alt="bu3" src="https://github.com/user-attachments/assets/2c61cf65-45e2-4f7d-af60-aa457fd9d681" />
+
+<img width="1907" height="1036" alt="bu4" src="https://github.com/user-attachments/assets/b0511fb1-36fd-4a6d-b751-5c638b0c2259" />
+
+<img width="1909" height="1035" alt="st1" src="https://github.com/user-attachments/assets/1d18df7b-f653-46ea-8c11-9c5b2b3abf74" />
+
+<img width="1910" height="1032" alt="st2" src="https://github.com/user-attachments/assets/2cec2112-29dc-4aa5-b1b5-cc13543e649f" />
+
+<img width="1913" height="1031" alt="st3" src="https://github.com/user-attachments/assets/caaa276c-aa70-40ec-ab71-4320d692f9d6" />
+
+<img width="1918" height="1044" alt="st4" src="https://github.com/user-attachments/assets/10fac47f-b7e4-47b9-9011-dae4d697d567" />
+
+<img width="1912" height="1034" alt="st5" src="https://github.com/user-attachments/assets/52f1fd7b-01ce-425b-9c2f-f634ebcb4ca0" />
 
 # References
 
@@ -92,32 +116,8 @@ The names of the tools are references to my favorite mecha animes Aldnoah Zero, 
 
 # Future Tools
 
-U-Link System Stage Editor
-<img width="1234" height="644" alt="u21" src="https://github.com/user-attachments/assets/4a7e803e-2abe-45ae-ad94-73e0c5550678" />
-<img width="1089" height="725" alt="u23" src="https://github.com/user-attachments/assets/f7b38d12-bc9b-4962-91ec-260ccd6f2c1b" />
-<img width="1710" height="729" alt="u33" src="https://github.com/user-attachments/assets/d1ed5e7a-4cf8-469b-b55e-c3e2ab3922e5" />
-<img width="949" height="526" alt="u38" src="https://github.com/user-attachments/assets/6d31722e-1996-415a-82a2-ae48287b9f56" />
-<img width="1095" height="724" alt="u39" src="https://github.com/user-attachments/assets/48674be1-5e4c-41fc-b60d-085cced81ed6" />
-
-
-
-Festum Conversion
-
-<img width="991" height="708" alt="f1" src="https://github.com/user-attachments/assets/6d7eab79-bda4-47d7-9c0d-5603b6779c11" />
-
-<img width="984" height="702" alt="f2" src="https://github.com/user-attachments/assets/a9b17076-80b3-43bf-8f0e-24c7c039664e" />
-
 G1T Krieger
 
 <img width="1113" height="788" alt="k11" src="https://github.com/user-attachments/assets/20070dd3-13b0-4ed5-990a-c107a5a1a507" />
 
 <img width="1108" height="783" alt="k16" src="https://github.com/user-attachments/assets/dbd76210-1830-4e6f-9579-4b8695f3a345" />
-
-
-U-Link System
-
-<img width="1008" height="826" alt="a7" src="https://github.com/user-attachments/assets/035cbe70-9528-44b8-b43a-c1b5b9ece12a" />
-
-Silver Will
-
-<img width="796" height="625" alt="a6" src="https://github.com/user-attachments/assets/320bb5a2-23b3-4452-864e-5b67dad6f63b" />
