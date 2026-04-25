@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, and Kybernes Scanner are added but future Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
 
 # Requirements to use my tools
 
@@ -109,6 +109,12 @@ Steel Editor has more features than Bubble Editor for now until I have time to w
 <img width="1918" height="1044" alt="st4" src="https://github.com/user-attachments/assets/10fac47f-b7e4-47b9-9011-dae4d697d567" />
 
 <img width="1912" height="1034" alt="st5" src="https://github.com/user-attachments/assets/52f1fd7b-01ce-425b-9c2f-f634ebcb4ca0" />
+
+# Festum Conversion
+
+A GUI Binary Translating Tool that can be used for XL, ECB, EM, MESC, etc formats that Koei Tecmo uses for storing strings/text. You can either translate within the tool or export/import json files. It can also be used for string modding if you don't want to translate but instead want to change the names of things (i.e., changing Lu Bu to Rad Bu as an example). One of the benefits of using Festum Conversion is it doesn't restrict you to the original string length limit the games expect, you can translate without string length limits in the binary file. So essentially, if your translation is longer than the original text then you can still use the longer translation without issue. You are not restricted to the original byte length limits the games impose.
+
+To clarify though, while you can translate or mod strings to be however long you desire, you still have to keep in mind the games' font and text scaling as well as character encodings (meaning if you wanted to translate the English version to say Arabic or Vietnamese as an example, you need to make sure the game you're translating supports the character encoding your language requires such as UTF-8 and other various ones). Festum Conversion provides you an easy way to translate binary files or mod strings without being held back by byte length limits.
 
 # References
 
