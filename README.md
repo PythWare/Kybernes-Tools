@@ -116,6 +116,14 @@ A GUI Binary Translating Tool that can be used for XL, ECB, EM, MESC, etc format
 
 To clarify though, while you can translate or mod strings to be however long you desire, you still have to keep in mind the games' font and text scaling as well as character encodings (meaning if you wanted to translate the English version to say Arabic or Vietnamese as an example, you need to make sure the game you're translating supports the character encoding your language requires such as UTF-8 and other various ones). Festum Conversion provides you an easy way to translate binary files or mod strings without being held back by byte length limits.
 
+<img width="1181" height="775" alt="fe1" src="https://github.com/user-attachments/assets/398b6741-8fce-446a-9b21-858a989f77f9" />
+
+<img width="1177" height="772" alt="fe3" src="https://github.com/user-attachments/assets/cb642c20-9891-44c7-8b4a-44d0b39145cd" />
+
+<img width="1279" height="754" alt="fe8" src="https://github.com/user-attachments/assets/07c361f3-37b6-45ad-9a5b-bbd01977b2ab" />
+
+<img width="1277" height="751" alt="fe9" src="https://github.com/user-attachments/assets/38af068e-836c-476c-8a81-11cc7ad7c84e" />
+
 # References
 
 The names of the tools are references to my favorite mecha animes Aldnoah Zero, Argevollen, and Fafner. Rad animes!
