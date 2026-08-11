@@ -1,7 +1,3 @@
-# Update
-
-I will no longer work on Kybernes Tools or other modding software for the dynastywarriors subreddit. I have endured a lot of hate and ungrateful behavior despite doing all of the reversing on my own and making good software for making modding accessible. I am not paid to do any of this and I am done. Going forward, games I build modding software for will be other games such as RWBY GE. If I develop any further software for modding games owned by Koei Tecmo, the software will be private.
-
 # Kybernes Tools
 
 This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
