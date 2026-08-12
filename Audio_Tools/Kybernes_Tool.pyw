@@ -32,17 +32,11 @@ Wrapper layout:
   0x0C: u32 wbd_size
   0x10: WBH blob
   ... : WBD blob
-  ... : taildata (last 6 bytes, used by Mod Manager/Aldnoah Engine)
-
-Taildata:
-  Always preserved from the original wrapped file
-  This tool does NOT expose taildata editing on purpose
 """
 
 SIG_WBH = bytes.fromhex("5F 48 42 57 30 30 30 30")  # _HBW0000
 SIG_WBD = bytes.fromhex("5F 44 42 57 30 30 30 30")  # _DBW0000
 
-TAIL_LEN = 6  # always 6 bytes
 
 # helpers/structs
 
@@ -1104,9 +1098,6 @@ def detect_wbd_body_offset(wbd_blob: bytes, raw_meta: list[dict] | None = None) 
     candidates = _guess_candidates()
 
     if not raw_meta:
-        # old behavior: pick something reasonable without WBH guidance
-        # Prefer the largest plausible candidate under 0x200 that isn't 0 (to skip tiny headers),
-        # but keep 0 as a fallback
         small = [c for c in candidates if c < 0x200]
         if small:
             return max(small)
@@ -1575,7 +1566,7 @@ def rebuild_wbd_and_rewrite_wbh(wbh_blob: bytes, wbd_blob: bytes, subsong_folder
 def try_unpack_wrapper_pairs(file_path: str, out_dir: str, base_offset: int = 0, max_pairs: int = 512, extract_subsongs: bool = True) -> ParseResult:
     """
     Parse one or more wrapper blocks sequentially
-    For WBD: declared size may overrun EOF, if so read to EOF - 6 (taildata)
+    For WBD: a declared size that overruns EOF is clamped to EOF
     """
     try:
         file_size = os.path.getsize(file_path)
@@ -1626,12 +1617,9 @@ def try_unpack_wrapper_pairs(file_path: str, out_dir: str, base_offset: int = 0,
                 if len(wbh_data) != wbh_size:
                     break
 
-                # Read WBD (declared if overruns EOF read to EOF - 6)
+                # Read WBD (declared, clamped to EOF if it overruns)
                 declared_end = wbd_abs + wbd_size
-                if declared_end > file_size:
-                    read_end = max(wbd_abs, file_size - TAIL_LEN)
-                else:
-                    read_end = declared_end
+                read_end = min(declared_end, file_size)
 
                 wbd_len = read_end - wbd_abs
                 if wbd_len <= 0:
@@ -1708,23 +1696,13 @@ def _collect_wb_pairs(wb_folder: str) -> list[tuple[int, str, str]]:
     return [(i, wbh_map[i], wbd_map[i]) for i in common]
 
 
-def build_wrapped_bin(original_bin: str, wb_folder: str, out_dir: str, tail_len: int = 6) -> tuple[int, list[str], list[str]]:
+def build_wrapped_bin(original_bin: str, wb_folder: str, out_dir: str) -> tuple[int, list[str], list[str]]:
     """
     Build new wrapped .bin file(s) from a wb_folder containing .wbh/.wbd (+ optional subsong folders)
     Returns (count, list_of_output_paths, list_of_notes)
     """
     if not os.path.isfile(original_bin):
         raise FileNotFoundError(f"Original file not found: {original_bin}")
-
-    # Read taildata from original (ALWAYS)
-    orig_size = os.path.getsize(original_bin)
-    if orig_size < tail_len:
-        raise ValueError("Original file is too small to contain taildata.")
-    with open(original_bin, "rb") as f:
-        f.seek(orig_size - tail_len)
-        tail = f.read(tail_len)
-        if len(tail) != tail_len:
-            raise ValueError("Failed to read taildata from original.")
 
     pairs = _collect_wb_pairs(wb_folder)
     if not pairs:
@@ -1758,7 +1736,7 @@ def build_wrapped_bin(original_bin: str, wb_folder: str, out_dir: str, tail_len:
         wbh_off = 0x10
         wbh_size = len(wbh)
         wbd_off = wbh_off + wbh_size
-        wbd_size = len(wbd)  # NOT including taildata
+        wbd_size = len(wbd)
 
         header = struct.pack("<4I", wbh_off, wbh_size, wbd_off, wbd_size)
 
@@ -1778,7 +1756,6 @@ def build_wrapped_bin(original_bin: str, wb_folder: str, out_dir: str, tail_len:
             out.write(header)
             out.write(wbh_patched)
             out.write(wbd_patched)
-            out.write(tail)
 
         outputs.append(out_path)
 
@@ -2130,7 +2107,7 @@ class App(tk.Tk):
                 continue
 
             try:
-                count, outputs, notes = build_wrapped_bin(original, wb_folder, out_dir, tail_len=TAIL_LEN)
+                count, outputs, notes = build_wrapped_bin(original, wb_folder, out_dir)
                 made_sets += 1
                 made_files += count
                 for note in notes:
