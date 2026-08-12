@@ -10,8 +10,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 APP_TITLE = "Festum Conversion, Binary Text Translator"
 DEFAULT_ENCODING = "utf-8"
 
-MOD_TAIL_SIZE = 6  # Aldnoah Engine taildata length
-
 SUPPORTED_FILE_PATTERNS = "*.xl *.em *.mesc *.ecb *.bin *.dat *.tbl"
 
 KOEI_EN_TEXT_REPLACEMENTS = {
@@ -109,19 +107,6 @@ def safe_int(s: str, default: int = 0) -> int:
         return int(s)
     except Exception:
         return default
-
-def split_mod_taildata(blob: bytes) -> tuple[bytes, bytes]:
-    """
-    Aldnoah Engine appends a 6 byte taildata to extracted files for mod manager bookkeeping
-    This taildata is not part of the underlying file format so we strip it for parsing/writing
-    then re-append it as the last 6 bytes on save
-    If the file is too small, returns (blob, b'')
-    """
-    if blob is None:
-        return b"", b""
-    if len(blob) < MOD_TAIL_SIZE:
-        return blob, b""
-    return blob[:-MOD_TAIL_SIZE], blob[-MOD_TAIL_SIZE:]
 
 # Format Parsing/Writing
 
@@ -553,8 +538,6 @@ def write_stringtable(original: bytes, strings: list, meta: dict, encoding: str)
 
 # Legacy formats
 
-TAIL_SIZE = MOD_TAIL_SIZE
-
 def parse_xl_legacy(data: bytes, encoding: str):
     """
     XL01/XL02 support
@@ -741,7 +724,7 @@ def parse_em(data: bytes, encoding: str):
     return strings, meta
 
 def write_em(original: bytes, strings: list, meta: dict, encoding: str):
-    """Append new strings at tail_start and move taildata, updating size/TOC offsets"""
+    """Append new strings at tail_start, updating size/TOC offsets"""
     size_field_offset = meta["size_field_offset"]
     size_field_len = meta["size_field_len"]
     toc_start = meta["toc_start"]
@@ -995,7 +978,6 @@ class FestumConversionApp(tk.Tk):
         self.current_format = None
         self.current_encoding = tk.StringVar(value=DEFAULT_ENCODING)
 
-        self.mod_taildata: bytes = b""
         self.original_core: bytes = b""
         self.work_q = queue.Queue()
         self._busy = False
@@ -1152,8 +1134,8 @@ class FestumConversionApp(tk.Tk):
         else:
             action, data = payload
             if action == "load":
-                strings, meta, fmt, path, data_core, mod_tail = data
-                self.on_loaded(path, fmt, strings, meta, data_core, mod_tail)
+                strings, meta, fmt, path, data_core = data
+                self.on_loaded(path, fmt, strings, meta, data_core)
             elif action == "save":
                 out_path = data
                 self.set_status(f"Saved: {os.path.basename(out_path)}")
@@ -1198,7 +1180,7 @@ class FestumConversionApp(tk.Tk):
             with open(pth, "rb") as f:
                 data_full = f.read()
 
-            data_core, mod_tail = split_mod_taildata(data_full)
+            data_core = data_full
 
             def parse_with(data_bytes: bytes):
                 fmt_local = detect_format(pth, data_bytes)
@@ -1224,12 +1206,12 @@ class FestumConversionApp(tk.Tk):
 
             fmt, strings, meta = parse_with(data_core)
 
-            return ("load", (strings, meta, fmt, pth, data_core, mod_tail))
+            return ("load", (strings, meta, fmt, pth, data_core))
 
         self.set_status(f"Loading {os.path.basename(path)}")
         self.run_worker(do_load, path, encoding)
 
-    def on_loaded(self, path, fmt, strings, meta, data_core=b'', mod_tail=b''):
+    def on_loaded(self, path, fmt, strings, meta, data_core=b''):
         self.current_file_path = path
         self.current_format = fmt
         self.current_strings = strings
@@ -1237,10 +1219,9 @@ class FestumConversionApp(tk.Tk):
 
 
         self.original_core = data_core if data_core is not None else b""
-        self.mod_taildata = mod_tail if mod_tail is not None else b""
         self.populate_tree(strings)
         self.save_btn.configure(state="normal")
-        self.set_status(f"{os.path.basename(path)} – {len(strings)} strings loaded ({fmt})." + (" [taildata]" if self.mod_taildata else ""))
+        self.set_status(f"{os.path.basename(path)} – {len(strings)} strings loaded ({fmt}).")
 
     def populate_tree(self, strings):
         self.visible_start = 0
@@ -1400,15 +1381,11 @@ class FestumConversionApp(tk.Tk):
 
 
         def do_save(src_path, dst_path, fmt, strings, meta, enc):
-            # Use the bytes we loaded to avoid re-parsing issues,
-            # then re-append the mod taildata as the final 6 bytes
+            # Use the bytes we loaded to avoid re-parsing issues
             original = self.original_core if self.original_core else b""
-            mod_tail = self.mod_taildata if self.mod_taildata else b""
             if not original:
-                # Fallback, read from disk, will not preserve mod taildata reliably if the file changed externally
                 with open(src_path, "rb") as f:
-                    data_full = f.read()
-                original, mod_tail = split_mod_taildata(data_full)
+                    original = f.read()
 
             if fmt == "em":
                 out = write_em(original, strings, meta, enc)
@@ -1424,12 +1401,6 @@ class FestumConversionApp(tk.Tk):
                 out = write_stringtable(original, strings, meta, enc)
             else:
                 raise ValueError(f"Unsupported save format: {fmt}")
-
-            # Ensure Aldnoah Engine taildata is the last 6 bytes of the output
-            if mod_tail:
-                if out.endswith(mod_tail):
-                    out = out[:-MOD_TAIL_SIZE]
-                out = out + mod_tail
 
             with open(dst_path, "wb") as fo:
                 fo.write(out)
