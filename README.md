@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with Aldnoah Engine unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with GokonSoftworks unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
 
 # Requirements to use my tools
 
@@ -8,7 +8,7 @@ Only a Python 3 installation, if a tool needs something like Pillow (python imag
 
 # Harklight, KVS Audio Tool
 
-Harklight is meant to be used with Aldnoah Engine (since AE handles subcontainer rebuilding which a lot of KVS files are stored in) but it has standalone usage. Harklight can decrypt KVS files to playable Oggs, convert Oggs to valid KVS files, and has a rad custom GUI all done in Python. It supports single or batch usage.
+Harklight is meant to be used with GokonSoftworks (since it handles subcontainer rebuilding which a lot of KVS files are stored in) but it has standalone usage. Harklight can decrypt KVS files to playable Oggs, convert Oggs to valid KVS files, and has a rad custom GUI all done in Python. It supports single or batch usage.
 
 <img width="1909" height="1032" alt="kv1" src="https://github.com/user-attachments/assets/f50e7db1-c3a4-4959-af3e-579cb1d7303b" />
 <img width="1909" height="1037" alt="kv2" src="https://github.com/user-attachments/assets/d3d5314e-9cec-4dbb-a70c-dad02d844958" />
@@ -53,7 +53,7 @@ To use with Wild Liberd, convert the songs you want to KVS with Harklight and pl
 
 # Kybernes Scanner
 
-Kybernes Scanner is a GUI WBD/WBH tool meant to be used with Aldnoah Engine for wrapped Koei Tecmo Wave Bank WBD/WBH files as of version 0.6 of Kybernes Tools, meaning it's meant to be used with files that store the WBD/WBH as a single combined file (like Warriors Orochi 3's case). It unpacks the wrapped files, unpacks the subsongs/subaudio from the WBD files, and creates wav versions for you to preview. It also allows rebuilding the files with the correct codec (PCM/MSADPCM/DSP), offsets, and metadata so the game loads it. Support for dynamic file size (meaning your replacement wav files can be larger or smaller than the originals) is implemented.
+Kybernes Scanner is a GUI WBD/WBH tool meant to be used with GokonSoftworks for wrapped Koei Tecmo Wave Bank WBD/WBH files as of version 0.6 of Kybernes Tools, meaning it's meant to be used with files that store the WBD/WBH as a single combined file (like Warriors Orochi 3's case). It unpacks the wrapped files, unpacks the subsongs/subaudio from the WBD files, and creates wav versions for you to preview. It also allows rebuilding the files with the correct codec (PCM/MSADPCM/DSP), offsets, and metadata so the game loads it. Support for dynamic file size (meaning your replacement wav files can be larger or smaller than the originals) is implemented.
 
 <img width="916" height="659" alt="k3" src="https://github.com/user-attachments/assets/0a9a76a4-8fe9-4be1-9576-8438b6066507" />
 
