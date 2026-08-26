@@ -21,7 +21,7 @@ KVS is for a lot of Koei Tecmo games the encrypted ogg format they use for voice
 
 # Audio modding with Harklight
 
-Use Harklight for converting KVS to ogg and vice versa, then when you need to apply your new audio mods use Aldnoah Engine to rebuild the KVS subcontainers. If you're dealing with loose KVS files that were not part of a subcontainer then you don't have to use AE's subcontainer rebuilding
+Use Harklight for converting KVS to ogg and vice versa, then when you need to apply your new audio mods use GokonSoftworks to rebuild the KVS subcontainers. If you're dealing with loose KVS files that were not part of a subcontainer then you don't have to use subcontainer rebuilding
 
 # Wild Liberd, G1L Tool
 
@@ -81,7 +81,7 @@ Don’t worry about sample rate/channels, you can use any sample rate (44.1k/48k
 
 Repack Guide:
 
-Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .bin. Use Aldnoah Engine's Mod Manager to apply/disable mods.
+Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .bin. Use GokonSoftworks' Mod Manager to apply/disable mods.
 
 # Steel/Bubble Unit Editors for Warriors Orochi 3
 
