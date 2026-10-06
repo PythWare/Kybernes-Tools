@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with GokonSoftworks unless listed as standalone, this repository will be updated periodically. As of March 29 2026 only Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
+This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with GokonSoftworks unless listed as standalone, this repository will be updated periodically. As of October 05 2026 only Katsuki's Software, Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
 
 # Requirements to use my tools
 
@@ -82,6 +82,12 @@ Don’t worry about sample rate/channels, you can use any sample rate (44.1k/48k
 Repack Guide:
 
 Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .bin. Use GokonSoftworks' Mod Manager to apply/disable mods.
+
+# Katsuki's Software
+
+This is software for modding the DLC bins that One Piece Pirate Warriors 3 uses. It fully unpacks the DLC bins along with their subcontainers and supports rebuilding the DLC bins. Modded DLC bins can be the same size, smaller, or larger. Credit goes to LordValencia for gifting me a steam copy of OP3.
+
+<img width="806" height="815" alt="kat1" src="https://github.com/user-attachments/assets/f46c1693-da49-4ebb-897d-26acae5a93e0" />
 
 # Steel/Bubble Unit Editors for Warriors Orochi 3
 
