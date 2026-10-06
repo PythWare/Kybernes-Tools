@@ -85,7 +85,7 @@ Click Repack. The tool rebuilds the WBD and WBH and outputs a new wrapped bank .
 
 # Katsuki's Software
 
-This is software for modding the DLC bins that One Piece Pirate Warriors 3 uses. It fully unpacks the DLC bins along with their subcontainers and supports rebuilding the DLC bins. Modded DLC bins can be the same size, smaller, or larger. Credit goes to LordValencia for gifting me a steam copy of OP3.
+This is software for modding the DLC bins that One Piece Pirate Warriors 3 uses. It fully unpacks the DLC bins along with their subcontainers and supports rebuilding the DLC bins. Modded DLC bins can be the same size, smaller, or larger. Credit goes to LordValencia and Mr Axiom Opera for gifting me a steam copy of OP3.
 
 <img width="806" height="815" alt="kat1" src="https://github.com/user-attachments/assets/f46c1693-da49-4ebb-897d-26acae5a93e0" />
 
