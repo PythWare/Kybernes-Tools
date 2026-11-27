@@ -8,20 +8,17 @@ Only a Python 3 installation, if a tool needs something like Pillow (python imag
 
 # Harklight, KVS Audio Tool
 
-Harklight is meant to be used with GokonSoftworks (since it handles subcontainer rebuilding which a lot of KVS files are stored in) but it has standalone usage. Harklight can decrypt KVS files to playable Oggs, convert Oggs to valid KVS files, and has a rad custom GUI all done in Python. It supports single or batch usage.
+Harklight is meant to be used with GokonSoftworks (since it handles subcontainer rebuilding which a lot of KVS files are stored in) but it has standalone usage. Harklight can decrypt KVS files to playable Oggs, convert Oggs to valid KVS files, and has a rad custom GUI all done in Python. It supports single or batch usage. Harklight also is starting to support .kno audio files
 
-<img width="1909" height="1032" alt="kv1" src="https://github.com/user-attachments/assets/f50e7db1-c3a4-4959-af3e-579cb1d7303b" />
-<img width="1909" height="1037" alt="kv2" src="https://github.com/user-attachments/assets/d3d5314e-9cec-4dbb-a70c-dad02d844958" />
-<img width="1914" height="1035" alt="kv3" src="https://github.com/user-attachments/assets/ebb33ffe-1f26-408c-b8c9-a9984fcfa2db" />
-<img width="1907" height="1036" alt="kv4" src="https://github.com/user-attachments/assets/41cc1d39-98e3-4bff-9a1d-d4e5224a3b99" />
+<img width="1920" height="1035" alt="hark1" src="https://github.com/user-attachments/assets/7d25aeca-2524-4c64-a7a6-48122008fd9d" />
 
 # Uses for Harklight
 
-KVS is for a lot of Koei Tecmo games the encrypted ogg format they use for voiced audio and other various things like bgm, sounds, etc. This tool is free and written in Python with no dependencies beyond having a python 3 installation.
+KVS is for a lot of Koei Tecmo games the encrypted ogg format they use for voiced audio and other various things like bgm, sounds, etc. This tool is free and written in Python with no dependencies beyond having a python 3 installation. .kno seems to be an audio format used for various atelier switch games, Harklight should work for all of them but I tested on sample .kno files sent to me so make sure to let me know if you encounter any edge cases.
 
 # Audio modding with Harklight
 
-Use Harklight for converting KVS to ogg and vice versa, then when you need to apply your new audio mods use GokonSoftworks to rebuild the KVS subcontainers. If you're dealing with loose KVS files that were not part of a subcontainer then you don't have to use subcontainer rebuilding
+Use Harklight for converting KVS to ogg and vice versa, then when you need to apply your new audio mods use GokonSoftworks to rebuild the KVS subcontainers. If you're dealing with loose KVS files that were not part of a subcontainer then you don't have to use subcontainer rebuilding. For .kno usage, same steps as kvs in that you select the input and then convert. 
 
 # Wild Liberd, G1L Tool
 
