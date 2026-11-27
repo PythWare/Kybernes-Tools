@@ -679,6 +679,35 @@ def unpack_ktss_file(source: Path, output_dir: Path | None, write_sidecar: bool)
         notes.append(f"trailer={len(trailer)}B")
     return written, " | ".join(notes)
 
+def resolve_ktss_loop(
+    name: str,
+    loop_start: int,
+    loop_end: int,
+    num_samples: int,
+    sidecar_path: Path | None,
+    notes: list[str],
+) -> tuple[int, int]:
+    track = f"the track is {num_samples} samples ({num_samples / OPUS_RATE:.2f}s) long"
+    source_label = f"in {sidecar_path.name}" if sidecar_path else "typed"
+    if loop_start < 0 or loop_end < 0:
+        raise ValueError(f"{name}: loop points can't be negative ({source_label}: start={loop_start}, end={loop_end}).")
+    if loop_start == 0 and loop_end == 0:
+        return 0, 0
+    if loop_end == 0:
+        notes.append("loop_end=0 so the loop runs to the end of the track")
+        loop_end = num_samples
+    if loop_end > num_samples:
+        if not sidecar_path:
+            raise ValueError(f"{name}: loop end {loop_end} is past the end of the audio; {track}.")
+        notes.append(f"loop_end clamped from {loop_end} to the new track length")
+        loop_end = num_samples
+    if loop_start >= loop_end:
+        fix = f"Edit loop_start_samples/loop_end_samples in {sidecar_path.name}." if sidecar_path else "Check the two values weren't swapped."
+        raise ValueError(
+            f"{name}: loop start {loop_start} must be before loop end {loop_end} ({source_label}), {track}. {fix}"
+        )
+    return loop_start, loop_end
+
 def pack_ktss_file(
     source: Path,
     output_dir: Path | None,
@@ -709,12 +738,9 @@ def pack_ktss_file(
         loop_end = int(metadata.get("loop_end_samples", 0))
         output_suffix = str(metadata.get("container_extension", ".kno")) or ".kno"
 
-    if loop_end > num_samples:
-        extra_notes.append(f"loop_end clamped from {loop_end}")
-        loop_end = num_samples
-    if loop_start > loop_end:
-        extra_notes.append(f"loop_start reset from {loop_start}")
-        loop_start = 0
+    loop_start, loop_end = resolve_ktss_loop(
+        source.name, loop_start, loop_end, num_samples, sidecar_path, extra_notes
+    )
 
     known = list(KTSS_FRAME_CHECK.iter_unpack(frame_checks[: len(frame_checks) // 8 * 8]))
     lookup = {crc: rng for crc, rng in known}
@@ -1229,7 +1255,8 @@ class KVSToolApp:
         tk.Label(
             self.encrypt_options,
             text="Auto header rule: unknown1 becomes 1 for non-looping files and 0 when either loop point is set. Unknown2-4 default to 0 unless a sidecar overrides them. "
-            "KNO files need 48 kHz Opus with 20 ms packets; edit loop points in the .ogg.json sidecar if you change the track length.",
+            "KNO files need 48 kHz Opus with 20 ms packets. Loop points are in 48 kHz samples, a loop end of 0 loops to the end of the track. "
+            "Edit loop points in the .ogg.json sidecar if you change the track length.",
             bg=THEME["panel"],
             fg=THEME["muted"],
             font=("Segoe UI", 9),
@@ -1442,6 +1469,9 @@ class KVSToolApp:
                     else:
                         kind = ogg_stream_kind(prefix)
                         label = {"opus": "Opus OGG -> .kno", "vorbis": "Vorbis OGG -> .kvs"}.get(kind, "OGG")
+                        if kind == "opus":
+                            opus_samples = read_ogg_opus(path)[3]
+                            label += f", {opus_samples} samples ({opus_samples / OPUS_RATE:.2f}s)"
                         metadata, sidecar_path = load_sidecar_for(path)
                         if metadata and sidecar_path:
                             self.input_hint_var.set(
