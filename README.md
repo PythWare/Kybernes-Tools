@@ -1,6 +1,6 @@
 # Kybernes Tools
 
-This repository will hold GUI Modding Tools I build to be used for PC Koei Tecmo/Omega Force games. They're meant to be used with GokonSoftworks unless listed as standalone, this repository will be updated periodically. As of October 05 2026 only Katsuki's Software, Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
+This repository will hold modding software I build to be used for PC Koei Tecmo, Omega Force, and Gust games. They're meant to be used with GokonSoftworks but some of them can be standalone such as Harklight, this repository will be updated periodically. As of Novemeber 27 2026 only Katsuki's Software, Steel Editor, Bubble Editor, Harklight, Wild Liberd, Kybernes Scanner, Festum Conversion are added but future Editors/Tools will be added here at later dates.
 
 # Requirements to use my tools
 
