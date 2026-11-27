@@ -1,18 +1,18 @@
 from __future__ import annotations
-
-import os, json, queue, struct, threading, time, traceback
+import os, json, queue, struct, threading, time, traceback, zlib
 from dataclasses import dataclass, replace
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox
-
-"""Harklight is a KVS Audio tool, meant to be used with Aldnoah Engine"""
 
 APP_DIR = Path(__file__).resolve().parent
 os.chdir(APP_DIR)
 
 HEADER_STRUCT = struct.Struct("<4s7i")
 VALID_MAGIC = {b"KOVS", b"KVS\x00"}
+KVS_EXTENSIONS = {".kvs", ".kovs"}
+KTSS_EXTENSIONS = {".kno", ".ktss"}
+CONTAINER_EXTENSIONS = KVS_EXTENSIONS | KTSS_EXTENSIONS
 SIDECAR_MARKER = "kvs_tool_metadata"
 SIDECAR_VERSION = 1
 STREAM_CHUNK_SIZE = 1024 * 1024
@@ -41,7 +41,6 @@ THEME = {
     "button_text_active": "#0A1021",
     "log_bg": "#0A1125",
 }
-
 
 def create_round_rect(
     canvas: tk.Canvas,
@@ -81,7 +80,6 @@ def create_round_rect(
     ]
     return canvas.create_polygon(points, smooth=True, splinesteps=24, **kwargs)
 
-
 def human_size(size: int) -> str:
     value = float(size)
     for unit in ("B", "KB", "MB", "GB"):
@@ -92,28 +90,23 @@ def human_size(size: int) -> str:
         value /= 1024
     return f"{value:.2f} GB"
 
-
 def xor_transform(blob: bytes) -> bytes:
     transformed = bytearray(blob)
     for index in range(min(0x100, len(transformed))):
         transformed[index] ^= index & 0xFF
     return bytes(transformed)
 
-
 def looks_like_ogg(blob: bytes) -> bool:
     return len(blob) >= 4 and blob[:4] == b"OggS"
-
 
 def read_prefix(path: Path, size: int) -> bytes:
     with path.open("rb") as handle:
         return handle.read(size)
 
-
 def xor_chunk_in_place(chunk: bytearray, start_offset: int):
     limit = min(len(chunk), max(0, 0x100 - start_offset))
     for index in range(limit):
         chunk[index] ^= (start_offset + index) & 0xFF
-
 
 def copy_xor_stream(reader, writer, size: int):
     remaining = size
@@ -127,16 +120,14 @@ def copy_xor_stream(reader, writer, size: int):
         offset += len(chunk)
         remaining -= len(chunk)
 
-
 def parse_int(text: str, label: str) -> int:
     value = text.strip()
     if not value:
-        raise ValueError(f"{label} cannot be blank.")
+        raise ValueError(f"{label} cant be blank.")
     try:
         return int(value, 0)
     except ValueError as exc:
         raise ValueError(f"{label} must be a valid integer.") from exc
-
 
 @dataclass(frozen=True)
 class HeaderValues:
@@ -220,13 +211,11 @@ class HeaderValues:
             "trailer_hex": trailer.hex(),
         }
 
-
 @dataclass(frozen=True)
 class ParsedContainer:
     header: HeaderValues
     payload: bytes
     trailer: bytes
-
 
 @dataclass(frozen=True)
 class JobConfig:
@@ -239,7 +228,6 @@ class JobConfig:
     prefer_sidecar: bool
     default_loop_start: int
     default_loop_end: int
-
 
 def build_default_header(size: int, loop_start: int, loop_end: int) -> HeaderValues:
     auto_unknown1 = 1 if loop_start == 0 and loop_end == 0 else 0
@@ -254,23 +242,21 @@ def build_default_header(size: int, loop_start: int, loop_end: int) -> HeaderVal
         unknown4=0,
     )
 
-
 def read_kvs_container(path: Path) -> ParsedContainer:
     data = path.read_bytes()
     header = HeaderValues.from_bytes(data)
     if header.magic not in VALID_MAGIC and header.magic_text != "KOVS":
-        raise ValueError(f"{path.name} does not start with a supported KVS magic.")
+        raise ValueError(f"{path.name} doesnt start with a supported KVS magic.")
     if header.size < 0:
         raise ValueError(f"{path.name} has a negative payload size in the header.")
     payload_end = HEADER_STRUCT.size + header.size
     if payload_end > len(data):
         raise ValueError(
-            f"{path.name} declares {header.size} bytes of audio, but the file only has {len(data) - HEADER_STRUCT.size} bytes."
+            f"{path.name} declares {header.size} bytes of audio but the file only has {len(data) - HEADER_STRUCT.size} bytes."
         )
     payload = data[HEADER_STRUCT.size:payload_end]
     trailer = data[payload_end:]
     return ParsedContainer(header=header, payload=payload, trailer=trailer)
-
 
 def peek_kvs_container(path: Path) -> tuple[HeaderValues, int]:
     header = HeaderValues.from_bytes(read_prefix(path, HEADER_STRUCT.size))
@@ -278,10 +264,9 @@ def peek_kvs_container(path: Path) -> tuple[HeaderValues, int]:
     payload_end = HEADER_STRUCT.size + header.size
     if payload_end > file_size:
         raise ValueError(
-            f"{path.name} declares {header.size} bytes of audio, but the file only has {file_size - HEADER_STRUCT.size} bytes."
+            f"{path.name} declares {header.size} bytes of audio but the file only has {file_size - HEADER_STRUCT.size} bytes."
         )
     return header, file_size - payload_end
-
 
 def sidecar_candidates(source: Path) -> list[Path]:
     candidates = [
@@ -299,7 +284,6 @@ def sidecar_candidates(source: Path) -> list[Path]:
             seen.add(candidate)
     return unique
 
-
 def load_sidecar_for(source: Path) -> tuple[dict | None, Path | None]:
     for candidate in sidecar_candidates(source):
         if not candidate.exists():
@@ -312,9 +296,10 @@ def load_sidecar_for(source: Path) -> tuple[dict | None, Path | None]:
             return metadata, candidate
     return None, None
 
-
 def decrypt_file(source: Path, output_dir: Path | None, write_sidecar: bool) -> tuple[list[Path], str]:
-    header, _trailer_len = peek_kvs_container(source)
+    if read_prefix(source, 4) == KTSS_MAGIC:
+        return unpack_ktss_file(source, output_dir, write_sidecar)
+    header, trailer_len = peek_kvs_container(source)
     target = (output_dir / source.with_suffix(".ogg").name) if output_dir else source.with_suffix(".ogg")
     target.parent.mkdir(parents=True, exist_ok=True)
     with source.open("rb") as reader, target.open("wb") as writer:
@@ -337,7 +322,6 @@ def decrypt_file(source: Path, output_dir: Path | None, write_sidecar: bool) -> 
         notes.append(f"trailer={len(trailer)}B")
     return written, " | ".join(notes)
 
-
 def encrypt_file(
     source: Path,
     output_dir: Path | None,
@@ -349,9 +333,11 @@ def encrypt_file(
     if not looks_like_ogg(prefix):
         prefix_hex = prefix.hex(" ") if prefix else "empty"
         raise ValueError(
-            f"{source.name} does not look like an OGG file. Pick the decrypted .ogg file, not a .kvs/.kovs container. "
+            f"{source.name} doesnt look like an OGG file. Pick the decrypted .ogg file, not a .kvs/.kovs container. "
             f"First bytes: {prefix_hex}"
         )
+    if ogg_stream_kind(read_prefix(source, 512)) == "opus":
+        return pack_ktss_file(source, output_dir, prefer_sidecar, default_loop_start, default_loop_end)
     ogg_size = source.stat().st_size
     metadata = None
     sidecar_path = None
@@ -391,18 +377,405 @@ def encrypt_file(
         note.append(f"trailer={len(trailer)}B")
     return [target], " | ".join(note)
 
+KTSS_MAGIC = b"KTSS"
+KTSS_CODEC_DSP = 0x02
+KTSS_CODEC_OPUS = 0x09
+KTSS_CODEC_NAMES = {KTSS_CODEC_DSP: "DSP-ADPCM", KTSS_CODEC_OPUS: "Opus"}
+KTSS_HEADER_SIZE = 0x70
+KTSS_SIDECAR_CONTAINER = "ktss"
+KTSS_FRAME_HEADER = struct.Struct(">II")
+KTSS_FRAME_CHECK = struct.Struct(">II")
+OPUS_RATE = 48000
+OPUS_FRAME_SAMPLES = 960
+OGG_PAGE_TARGET_BYTES = 4096
+OPUS_EXPORT_HINT = (
+    "Export as 48 kHz Opus with 20 ms frames, i.e. "
+    "ffmpeg -i in.wav -ar 48000 -c:a libopus -b:a 48k -vbr off -frame_duration 20 -application lowdelay out.ogg"
+)
+
+BIT_REVERSE_TABLE = bytes(int(f"{value:08b}"[::-1], 2) for value in range(256))
+ZERO_RUN_CRC: dict[int, int] = {}
+
+def ogg_crc(data: bytes | bytearray) -> int:
+    length = len(data)
+    zero_crc = ZERO_RUN_CRC.get(length)
+    if zero_crc is None:
+        zero_crc = ZERO_RUN_CRC[length] = zlib.crc32(bytes(length))
+    value = zlib.crc32(data.translate(BIT_REVERSE_TABLE)) ^ zero_crc
+    return int(f"{value:032b}"[::-1], 2)
+
+def build_ogg_page(packets: list[bytes], granule: int, serial: int, sequence: int, flags: int) -> bytes:
+    lacing = bytearray()
+    for packet in packets:
+        lacing += b"\xff" * (len(packet) // 255)
+        lacing.append(len(packet) % 255)
+    page = bytearray(struct.pack("<4sBBqIIIB", b"OggS", 0, flags, granule, serial, sequence, 0, len(lacing)))
+    page += lacing
+    for packet in packets:
+        page += packet
+    struct.pack_into("<I", page, 22, ogg_crc(page))
+    return bytes(page)
+
+def ogg_stream_kind(prefix: bytes) -> str:
+    if len(prefix) < 27 or prefix[:4] != b"OggS":
+        return "unknown"
+    body = prefix[27 + prefix[26]:]
+    if body.startswith(b"OpusHead"):
+        return "opus"
+    if body.startswith(b"\x01vorbis"):
+        return "vorbis"
+    return "unknown"
+
+def opus_packet_samples(packet: bytes) -> int:
+    toc = packet[0]
+    config = toc >> 3
+    if config < 12:
+        frame = (480, 960, 1920, 2880)[config & 3]
+    elif config < 16:
+        frame = (480, 960)[config & 1]
+    else:
+        frame = (120, 240, 480, 960)[config & 3]
+    code = toc & 3
+    if code == 0:
+        count = 1
+    elif code < 3:
+        count = 2
+    else:
+        count = packet[1] & 0x3F if len(packet) > 1 else 0
+    return frame * count
+
+@dataclass(frozen=True)
+class KTSSInfo:
+    codec: int
+    layers: int
+    channels: int
+    sample_rate: int
+    num_samples: int
+    loop_start: int
+    loop_length: int
+    data_offset: int
+    data_size: int
+    frame_count: int
+    preskip: int
+
+    @property
+    def codec_name(self) -> str:
+        return KTSS_CODEC_NAMES.get(self.codec, f"codec 0x{self.codec:02X}")
+
+    @property
+    def loop_end(self) -> int:
+        return self.loop_start + self.loop_length
+
+    @property
+    def duration(self) -> float:
+        return self.num_samples / self.sample_rate if self.sample_rate else 0.0
+
+def parse_ktss_header(blob: bytes, name: str) -> KTSSInfo:
+    if len(blob) < 0x40 or blob[:4] != KTSS_MAGIC:
+        raise ValueError(f"{name} isnt a KTSS container.")
+    u32 = lambda offset: struct.unpack_from("<I", blob, offset)[0]
+    codec = blob[0x20]
+    opus = codec == KTSS_CODEC_OPUS and len(blob) >= 0x5C
+    return KTSSInfo(
+        codec=codec,
+        layers=blob[0x28],
+        channels=blob[0x29],
+        sample_rate=u32(0x2C),
+        num_samples=u32(0x30),
+        loop_start=u32(0x34),
+        loop_length=u32(0x38),
+        data_offset=u32(0x40) if opus else 0x20 + u32(0x24),
+        data_size=u32(0x44) if opus else 0,
+        frame_count=u32(0x4C) if opus else 0,
+        preskip=struct.unpack_from("<H", blob, 0x58)[0] if opus else 0,
+    )
+
+def peek_ktss(path: Path) -> KTSSInfo:
+    return parse_ktss_header(read_prefix(path, KTSS_HEADER_SIZE), path.name)
+
+def require_supported_ktss(info: KTSSInfo, name: str):
+    if info.codec == KTSS_CODEC_DSP:
+        raise ValueError(f"{name} holds DSP-ADPCM audio. Harklight only converts Opus KTSS files so far.")
+    if info.codec != KTSS_CODEC_OPUS:
+        raise ValueError(f"{name} uses an unknown KTSS {info.codec_name}.")
+    if info.layers != 1 or info.channels not in (1, 2):
+        raise ValueError(f"{name} has {info.layers} layers/{info.channels} channels. Only mono or stereo is supported so far.")
+
+def read_ktss_opus(path: Path) -> tuple[KTSSInfo, bytes, list[bytes], list[int], bytes]:
+    data = path.read_bytes()
+    info = parse_ktss_header(data, path.name)
+    require_supported_ktss(info, path.name)
+    end = info.data_offset + info.data_size
+    if end > len(data):
+        raise ValueError(f"{path.name} declares {info.data_size} bytes of Opus data but the file is too short.")
+    packets: list[bytes] = []
+    ranges: list[int] = []
+    unpack_frame = KTSS_FRAME_HEADER.unpack_from
+    offset = info.data_offset
+    while offset < end:
+        if offset + 8 > end:
+            raise ValueError(f"{path.name}: truncated Opus frame header at 0x{offset:X}.")
+        size, final_range = unpack_frame(data, offset)
+        start = offset + 8
+        stop = start + size
+        if size == 0 or stop > end:
+            raise ValueError(f"{path.name}: bad Opus frame at 0x{offset:X} (size {size}).")
+        packets.append(data[start:stop])
+        ranges.append(final_range)
+        offset = stop
+    return info, data[: info.data_offset], packets, ranges, data[end:]
+
+def build_ogg_opus(packets: list[bytes], channels: int, preskip: int, num_samples: int, serial: int) -> bytes:
+    if not packets:
+        raise ValueError("There are no Opus packets to write.")
+    head = struct.pack("<8sBBHIhB", b"OpusHead", 1, channels, preskip, OPUS_RATE, 0, 0)
+    vendor = b"Harklight KTSS remux"
+    tags = b"OpusTags" + struct.pack("<I", len(vendor)) + vendor + struct.pack("<I", 0)
+    pages = [build_ogg_page([head], 0, serial, 0, 0x02), build_ogg_page([tags], 0, serial, 1, 0x00)]
+    decoded_total = sum(opus_packet_samples(packet) for packet in packets)
+    final_granule = min(preskip + num_samples, decoded_total)
+    sequence, granule = 2, 0
+    page: list[bytes] = []
+    segments = page_bytes = 0
+    for packet in packets:
+        needed = len(packet) // 255 + 1
+        if page and (segments + needed > 255 or page_bytes + len(packet) > OGG_PAGE_TARGET_BYTES):
+            pages.append(build_ogg_page(page, granule, serial, sequence, 0x00))
+            sequence += 1
+            page, segments, page_bytes = [], 0, 0
+        page.append(packet)
+        segments += needed
+        page_bytes += len(packet)
+        granule += opus_packet_samples(packet)
+    pages.append(build_ogg_page(page, final_granule, serial, sequence, 0x04))
+    return b"".join(pages)
+
+def read_ogg_opus(path: Path) -> tuple[int, int, list[bytes], int]:
+    data = path.read_bytes()
+    packets: list[bytes] = []
+    pending = bytearray()
+    serial = None
+    last_granule = -1
+    offset = 0
+    while offset < len(data):
+        if data[offset:offset + 4] != b"OggS" or offset + 27 > len(data):
+            raise ValueError(f"{path.name}: lost Ogg sync at 0x{offset:X}.")
+        granule, page_serial = struct.unpack_from("<qI", data, offset + 6)
+        segment_count = data[offset + 26]
+        lacing = data[offset + 27: offset + 27 + segment_count]
+        body = offset + 27 + segment_count
+        page_end = body + sum(lacing)
+        if page_end > len(data):
+            raise ValueError(f"{path.name}: truncated Ogg page at 0x{offset:X}.")
+        page = bytearray(data[offset:page_end])
+        stored_crc = struct.unpack_from("<I", page, 22)[0]
+        page[22:26] = b"\x00\x00\x00\x00"
+        if ogg_crc(page) != stored_crc:
+            raise ValueError(f"{path.name}: Ogg page at 0x{offset:X} failed its checksum.")
+        if serial is None:
+            serial = page_serial
+        if page_serial == serial:
+            position = body
+            for lace in lacing:
+                pending += data[position:position + lace]
+                position += lace
+                if lace < 255:
+                    packets.append(bytes(pending))
+                    pending.clear()
+            if granule != -1:
+                last_granule = granule
+        offset = page_end
+
+    if len(packets) < 3 or not packets[0].startswith(b"OpusHead"):
+        raise ValueError(f"{path.name} isnt an Ogg Opus file with audio in it.")
+    head = packets[0]
+    channels, (preskip,), mapping_family = head[9], struct.unpack_from("<H", head, 10), head[18]
+    if channels not in (1, 2) or mapping_family != 0:
+        raise ValueError(f"{path.name} has {channels} channels. Only mono or stereo Opus can go into a KTSS file so far.")
+    audio = packets[2:]
+    for index, packet in enumerate(audio):
+        if not packet:
+            raise ValueError(f"{path.name}: Opus packet {index} is empty (DTX/silence packets arent supported). {OPUS_EXPORT_HINT}")
+        samples = opus_packet_samples(packet)
+        if samples != OPUS_FRAME_SAMPLES:
+            raise ValueError(
+                f"{path.name}: Opus packet {index} is {samples / 48:.1f} ms long but KTSS needs 20 ms packets. {OPUS_EXPORT_HINT}"
+            )
+    decoded_total = len(audio) * OPUS_FRAME_SAMPLES
+    if last_granule < 0:
+        last_granule = decoded_total
+    num_samples = max(0, min(last_granule, decoded_total) - preskip)
+    return channels, preskip, audio, num_samples
+
+def build_ktss_header(
+    template: bytes,
+    channels: int,
+    num_samples: int,
+    loop_start: int,
+    loop_length: int,
+    data_size: int,
+    frame_count: int,
+    max_frame_bytes: int,
+    preskip: int,
+    total_size: int,
+) -> bytes:
+    header = bytearray(template)
+    if len(header) < KTSS_HEADER_SIZE:
+        header.extend(bytes(KTSS_HEADER_SIZE - len(header)))
+    if not template:
+        header[0x22] = header[0x23] = 3
+        header[0x28] = 1
+    header[0:4] = KTSS_MAGIC
+    struct.pack_into("<I", header, 0x04, total_size)
+    header[0x20] = KTSS_CODEC_OPUS
+    struct.pack_into("<I", header, 0x24, len(header) - 0x20)
+    header[0x29] = channels
+    struct.pack_into("<IIII", header, 0x2C, OPUS_RATE, num_samples, loop_start, loop_length)
+    struct.pack_into("<II", header, 0x40, len(header), data_size)
+    struct.pack_into("<I", header, 0x4C, frame_count)
+    struct.pack_into("<HHIH", header, 0x50, max_frame_bytes, OPUS_FRAME_SAMPLES, OPUS_RATE, preskip)
+    header[0x5A] = 1
+    header[0x5B] = 1 if channels == 2 else 0
+    return bytes(header)
+
+def unpack_ktss_file(source: Path, output_dir: Path | None, write_sidecar: bool) -> tuple[list[Path], str]:
+    info, header, packets, ranges, trailer = read_ktss_opus(source)
+    target = (output_dir / source.with_suffix(".ogg").name) if output_dir else source.with_suffix(".ogg")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    serial = zlib.crc32(source.name.encode("utf-8"))
+    target.write_bytes(build_ogg_opus(packets, info.channels, info.preskip, info.num_samples, serial))
+    written = [target]
+    notes = [
+        f"{source.name} -> {target.name} (KTSS Opus, {info.channels}ch, {info.duration:.2f}s, {len(packets)} frames)",
+        f"loop_start={info.loop_start}",
+        f"loop_end={info.loop_end}",
+    ]
+    if info.frame_count and info.frame_count != len(packets):
+        notes.append(f"header says {info.frame_count} frames")
+    if write_sidecar:
+        checks = b"".join(KTSS_FRAME_CHECK.pack(zlib.crc32(packet), rng) for packet, rng in zip(packets, ranges))
+        sidecar_path = Path(f"{target}.json")
+        sidecar_payload = {
+            "format": SIDECAR_MARKER,
+            "version": SIDECAR_VERSION,
+            "container": KTSS_SIDECAR_CONTAINER,
+            "source_file": source.name,
+            "output_file": target.name,
+            "container_extension": source.suffix.lower() or ".kno",
+            "codec": info.codec_name,
+            "channels": info.channels,
+            "num_samples": info.num_samples,
+            "preskip": info.preskip,
+            "loop_start_samples": info.loop_start,
+            "loop_end_samples": info.loop_end,
+            "header_hex": header.hex(),
+            "trailer_hex": trailer.hex(),
+            "frame_checks_hex": checks.hex(),
+        }
+        sidecar_path.write_text(json.dumps(sidecar_payload, indent=2), encoding="utf-8")
+        written.append(sidecar_path)
+        notes.append(f"sidecar={sidecar_path.name}")
+    if trailer:
+        notes.append(f"trailer={len(trailer)}B")
+    return written, " | ".join(notes)
+
+def pack_ktss_file(
+    source: Path,
+    output_dir: Path | None,
+    prefer_sidecar: bool,
+    default_loop_start: int,
+    default_loop_end: int,
+) -> tuple[list[Path], str]:
+    channels, preskip, packets, num_samples = read_ogg_opus(source)
+    metadata, sidecar_path = load_sidecar_for(source) if prefer_sidecar else (None, None)
+    extra_notes: list[str] = []
+    if metadata and metadata.get("container") != KTSS_SIDECAR_CONTAINER:
+        extra_notes.append(f"ignored {sidecar_path.name} (it is a KVS sidecar)")
+        metadata = sidecar_path = None
+
+    template = trailer = frame_checks = b""
+    output_suffix = ".kno"
+    loop_start, loop_end = default_loop_start, default_loop_end
+    if metadata:
+        try:
+            template = bytes.fromhex(str(metadata.get("header_hex", "")))
+            trailer = bytes.fromhex(str(metadata.get("trailer_hex", "")))
+            frame_checks = bytes.fromhex(str(metadata.get("frame_checks_hex", "")))
+        except ValueError as exc:
+            raise ValueError(f"{sidecar_path.name} has invalid hex data.") from exc
+        if template[:4] != KTSS_MAGIC:
+            raise ValueError(f"{sidecar_path.name} doesnt hold a KTSS header.")
+        loop_start = int(metadata.get("loop_start_samples", 0))
+        loop_end = int(metadata.get("loop_end_samples", 0))
+        output_suffix = str(metadata.get("container_extension", ".kno")) or ".kno"
+
+    if loop_end > num_samples:
+        extra_notes.append(f"loop_end clamped from {loop_end}")
+        loop_end = num_samples
+    if loop_start > loop_end:
+        extra_notes.append(f"loop_start reset from {loop_start}")
+        loop_start = 0
+
+    known = list(KTSS_FRAME_CHECK.iter_unpack(frame_checks[: len(frame_checks) // 8 * 8]))
+    lookup = {crc: rng for crc, rng in known}
+    frames = bytearray()
+    pack_frame = KTSS_FRAME_HEADER.pack
+    reused = 0
+    for index, packet in enumerate(packets):
+        crc = zlib.crc32(packet)
+        if index < len(known) and known[index][0] == crc:
+            final_range = known[index][1]
+        else:
+            final_range = lookup.get(crc)
+        if final_range is None:
+            final_range = 0
+        else:
+            reused += 1
+        frames += pack_frame(len(packet), final_range)
+        frames += packet
+
+    header_len = max(len(template), KTSS_HEADER_SIZE)
+    header = build_ktss_header(
+        template,
+        channels=channels,
+        num_samples=num_samples,
+        loop_start=loop_start,
+        loop_length=loop_end - loop_start,
+        data_size=len(frames),
+        frame_count=len(packets),
+        max_frame_bytes=8 + max(len(packet) for packet in packets),
+        preskip=preskip,
+        total_size=header_len + len(frames) + len(trailer),
+    )
+    output_suffix = output_suffix if output_suffix.startswith(".") else f".{output_suffix}"
+    target = (output_dir / f"{source.stem}{output_suffix}") if output_dir else source.with_suffix(output_suffix)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("wb") as writer:
+        writer.write(header)
+        writer.write(frames)
+        if trailer:
+            writer.write(trailer)
+    notes = [
+        f"{source.name} -> {target.name} (KTSS Opus, {channels}ch, {num_samples / OPUS_RATE:.2f}s, {len(packets)} frames)",
+        f"loop_start={loop_start}",
+        f"loop_end={loop_end}",
+        f"original frames={reused}/{len(packets)}",
+    ]
+    if sidecar_path:
+        notes.append(f"metadata={sidecar_path.name}")
+    notes.extend(extra_notes)
+    return [target], " | ".join(notes)
 
 def collect_input_files(config: JobConfig) -> list[Path]:
     if config.mode == "single":
         return [config.input_path]
 
-    patterns = ("*.kvs", "*.kovs") if config.action == "decrypt" else ("*.ogg",)
     iterator = config.input_path.rglob("*") if config.recurse else config.input_path.glob("*")
     input_root = config.input_path.resolve(strict=False)
     output_root = config.output_path.resolve(strict=False) if config.output_path else None
     exclude_output = bool(output_root and output_root != input_root and input_root in output_root.parents)
     found: list[Path] = []
-    valid_suffixes = {pattern.replace("*", "").lower() for pattern in patterns}
+    valid_suffixes = CONTAINER_EXTENSIONS if config.action == "decrypt" else {".ogg"}
     for path in iterator:
         if not path.is_file():
             continue
@@ -411,7 +784,6 @@ def collect_input_files(config: JobConfig) -> list[Path]:
         if path.suffix.lower() in valid_suffixes:
             found.append(path)
     return sorted(found)
-
 
 class SegmentedToggle(tk.Frame):
     def __init__(self, master, variable: tk.StringVar, options, command=None):
@@ -440,7 +812,7 @@ class SegmentedToggle(tk.Frame):
         self.variable.trace_add("write", self.on_change)
         self.refresh()
 
-    def on_change(self, *_args):
+    def on_change(self, *args):
         self.refresh()
         if self.command:
             self.command(self.variable.get())
@@ -482,7 +854,6 @@ class SegmentedToggle(tk.Frame):
                     activeforeground=THEME["text"],
                 )
 
-
 class ProgressStrip(tk.Canvas):
     def __init__(self, master):
         super().__init__(master, height=34, bg=THEME["panel"], highlightthickness=0)
@@ -495,7 +866,7 @@ class ProgressStrip(tk.Canvas):
         self.label = label
         self.redraw()
 
-    def redraw(self, _event=None):
+    def redraw(self, event=None):
         self.delete("all")
         width = max(self.winfo_width(), 10)
         height = max(self.winfo_height(), 10)
@@ -514,11 +885,10 @@ class ProgressStrip(tk.Canvas):
             fill=THEME["text"],
         )
 
-
 class KVSToolApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("Harklight, KVS Audio Tool")
+        self.root.title("Harklight, KVS/KNO Audio Tool")
         self.root.geometry("1120x1030")
         self.root.minsize(980, 700)
         self.root.configure(bg=THEME["bg"])
@@ -533,7 +903,7 @@ class KVSToolApp:
         self.loop_start_var = tk.StringVar(value="0")
         self.loop_end_var = tk.StringVar(value="0")
         self.status_var = tk.StringVar(value="Ready")
-        self.input_hint_var = tk.StringVar(value="Pick a KVS/KOVS file to decrypt or an OGG file to package.")
+        self.input_hint_var = tk.StringVar(value="Pick a KVS/KOVS/KNO file to decrypt or an OGG file to package.")
 
         self.worker: threading.Thread | None = None
         self.cancel_event = threading.Event()
@@ -548,7 +918,7 @@ class KVSToolApp:
 
         self.build_ui()
         self.schedule_queue_poll()
-        self._animate_hero()
+        self.animate_hero()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def build_ui(self):
@@ -573,8 +943,8 @@ class KVSToolApp:
         self.action_toggle = SegmentedToggle(
             action_group["body"],
             self.action_var,
-            [("decrypt", "Decrypt to OGG"), ("encrypt", "Create KVS")],
-            command=lambda _value: self.on_mode_changed(),
+            [("decrypt", "Decrypt to OGG"), ("encrypt", "Create KVS/KNO")],
+            command=lambda value: self.on_mode_changed(),
         )
         self.action_toggle.pack(fill="x")
         self.segment_controls.append(self.action_toggle)
@@ -585,7 +955,7 @@ class KVSToolApp:
             mode_group["body"],
             self.mode_var,
             [("single", "Single file"), ("folder", "Folder batch")],
-            command=lambda _value: self.on_mode_changed(),
+            command=lambda value: self.on_mode_changed(),
         )
         self.mode_toggle.pack(fill="x")
         self.segment_controls.append(self.mode_toggle)
@@ -603,7 +973,7 @@ class KVSToolApp:
         options_card = self.make_card(
             content,
             "Packaging Rules",
-            "Metadata sidecars keep loop points and unknown header fields intact for round-trips.",
+            "Metadata sidecars keep loop points and unknown header fields intact.",
         )
         options_card["card"].grid(row=0, column=1, sticky="nsew", padx=(8, 0), pady=(0, 12))
         self.build_options_section(options_card["body"])
@@ -617,7 +987,12 @@ class KVSToolApp:
         self.build_log_section(log_card["body"])
 
         self.on_mode_changed()
-        self.append_log("Loose KVS files in this workspace use a 32-byte header and XOR only the first 0x100 payload bytes.", "accent")
+        self.append_log("Loose KVS files in this workspace use a 32 byte header and XOR only the first 0x100 payload bytes.", "accent")
+        self.append_log(
+            "KNO/KTSS (Switch) files arent encrypted. Their Opus packets are copied into an Ogg Opus file losslessly. "
+            "Opus OGGs pack back to .kno, Vorbis OGGs to .kvs.",
+            "accent",
+        )
 
     def make_card(self, parent, title: str, subtitle: str):
         card = tk.Frame(parent, bg=THEME["panel"], highlightthickness=1, highlightbackground=THEME["edge"])
@@ -811,7 +1186,7 @@ class KVSToolApp:
         self.decrypt_sidecar_check.pack(anchor="w")
         tk.Label(
             self.decrypt_options,
-            text="The sidecar keeps loop points, unknown header fields, original extension, and any trailing bytes so edited OGG files can be packed back cleanly.",
+            text="The sidecar keeps loop points, unknown header fields, original extension, and any trailing bytes so edited OGG files can be packed back.",
             bg=THEME["panel"],
             fg=THEME["muted"],
             font=("Segoe UI", 9),
@@ -834,7 +1209,7 @@ class KVSToolApp:
         self.encrypt_sidecar_check.pack(anchor="w")
         tk.Label(
             self.encrypt_options,
-            text="If a sidecar is found next to the OGG, it wins. Otherwise the tool builds a clean KOVS header from the loop values below and defaults the unknown fields automatically.",
+            text="If a sidecar is found next to the OGG, it wins. Otherwise the tool builds a clean KOVS header (Vorbis OGG) or KTSS .kno header (Opus OGG) from the loop values below and defaults the unknown fields automatically.",
             bg=THEME["panel"],
             fg=THEME["muted"],
             font=("Segoe UI", 9),
@@ -853,7 +1228,8 @@ class KVSToolApp:
 
         tk.Label(
             self.encrypt_options,
-            text="Auto header rule: unknown1 becomes 1 for non-looping files and 0 when either loop point is set. Unknown2-4 default to 0 unless a sidecar overrides them.",
+            text="Auto header rule: unknown1 becomes 1 for non-looping files and 0 when either loop point is set. Unknown2-4 default to 0 unless a sidecar overrides them. "
+            "KNO files need 48 kHz Opus with 20 ms packets; edit loop points in the .ogg.json sidecar if you change the track length.",
             bg=THEME["panel"],
             fg=THEME["muted"],
             font=("Segoe UI", 9),
@@ -931,7 +1307,7 @@ class KVSToolApp:
         self.log.tag_configure("warn", foreground=THEME["warn"])
         self.log.tag_configure("muted", foreground=THEME["muted"])
 
-    def draw_backdrop(self, _event=None):
+    def draw_backdrop(self, event=None):
         self.backdrop.delete("all")
         width = self.backdrop.winfo_width()
         height = self.backdrop.winfo_height()
@@ -942,7 +1318,7 @@ class KVSToolApp:
         self.backdrop.create_line(0, height * 0.24, width, height * 0.06, fill=THEME["edge"], width=2)
         self.backdrop.create_line(0, height * 0.84, width, height * 0.56, fill=THEME["edge"], width=1)
 
-    def draw_hero(self, _event=None):
+    def draw_hero(self, event=None):
         self.hero.delete("all")
         width = max(self.hero.winfo_width(), 300)
         height = max(self.hero.winfo_height(), 150)
@@ -958,7 +1334,7 @@ class KVSToolApp:
             34,
             44,
             anchor="w",
-            text="KVS/Audio Toolkit",
+            text="Audio Software",
             fill=THEME["text"],
             font=("Bahnschrift SemiCondensed", 26, "bold"),
         )
@@ -966,19 +1342,19 @@ class KVSToolApp:
             36,
             84,
             anchor="w",
-            text="Decrypt loose KVS/KOVS audio to OGG, then pack edited OGG files back into the same container format.",
+            text="Decrypt loose KVS/KOVS or Switch KNO audio to OGG, then pack edited OGG files back into the same container format.",
             fill=THEME["muted"],
             font=("Segoe UI", 11),
             width=560,
         )
 
-    def _animate_hero(self):
+    def animate_hero(self):
         if self.is_busy:
-            self.root.after(180, self._animate_hero)
+            self.root.after(180, self.animate_hero)
             return
         self.hero_phase = (self.hero_phase + 1) % 40
         self.draw_hero()
-        self.root.after(100, self._animate_hero)
+        self.root.after(100, self.animate_hero)
 
     def append_log(self, message: str, tag: str = "muted"):
         self.log.insert("end", message + "\n", tag)
@@ -1001,8 +1377,8 @@ class KVSToolApp:
         if self.mode_var.get() == "single":
             if self.action_var.get() == "decrypt":
                 path = filedialog.askopenfilename(
-                    title="Pick a KVS/KOVS file",
-                    filetypes=[("KVS audio", "*.kvs *.kovs"), ("All files", "*.*")],
+                    title="Pick a KVS/KOVS/KNO file",
+                    filetypes=[("KVS/KNO audio", "*.kvs *.kovs *.kno *.ktss"), ("All files", "*.*")],
                     initialdir=initial_dir,
                 )
             else:
@@ -1038,36 +1414,47 @@ class KVSToolApp:
 
         path = Path(input_text)
         if not path.exists():
-            self.input_hint_var.set("The selected path does not exist yet.")
+            self.input_hint_var.set("The selected path doesnt exist yet.")
             return
 
         try:
             if self.mode_var.get() == "single":
                 if self.action_var.get() == "decrypt":
-                    header, trailer_len = peek_kvs_container(path)
-                    self.input_hint_var.set(
-                        f"{path.name}: payload={human_size(header.size)}, loop_start={header.loop_start_samples}, "
-                        f"loop_end={header.loop_end_samples}, unknown1={header.unknown1}, trailer={trailer_len}B"
-                    )
-                else:
-                    if not looks_like_ogg(read_prefix(path, 4)):
+                    if read_prefix(path, 4) == KTSS_MAGIC:
+                        info = peek_ktss(path)
+                        support = "" if info.codec == KTSS_CODEC_OPUS else " (not supported yet)"
                         self.input_hint_var.set(
-                            f"{path.name}: this does not look like an OGG file. Pick the decrypted .ogg, not the .kvs container."
+                            f"{path.name}: KTSS {info.codec_name}{support}, {info.channels}ch {info.sample_rate} Hz, "
+                            f"{info.duration:.2f}s, loop_start={info.loop_start}, loop_end={info.loop_end}"
                         )
                     else:
+                        header, trailer_len = peek_kvs_container(path)
+                        self.input_hint_var.set(
+                            f"{path.name}: payload={human_size(header.size)}, loop_start={header.loop_start_samples}, "
+                            f"loop_end={header.loop_end_samples}, unknown1={header.unknown1}, trailer={trailer_len}B"
+                        )
+                else:
+                    prefix = read_prefix(path, 512)
+                    if not looks_like_ogg(prefix):
+                        self.input_hint_var.set(
+                            f"{path.name}: this doesnt look like an OGG file. Pick the decrypted .ogg, not the .kvs/.kno container."
+                        )
+                    else:
+                        kind = ogg_stream_kind(prefix)
+                        label = {"opus": "Opus OGG -> .kno", "vorbis": "Vorbis OGG -> .kvs"}.get(kind, "OGG")
                         metadata, sidecar_path = load_sidecar_for(path)
                         if metadata and sidecar_path:
                             self.input_hint_var.set(
-                                f"{path.name}: {human_size(path.stat().st_size)} OGG, sidecar found ({sidecar_path.name}), "
+                                f"{path.name}: {human_size(path.stat().st_size)} {label}, sidecar found ({sidecar_path.name}), "
                                 f"loop_start={metadata.get('loop_start_samples', 0)}, loop_end={metadata.get('loop_end_samples', 0)}"
                             )
                         else:
                             self.input_hint_var.set(
-                                f"{path.name}: {human_size(path.stat().st_size)} OGG, no sidecar found. Manual loop values will be used."
+                                f"{path.name}: {human_size(path.stat().st_size)} {label}, no sidecar found. Manual loop values will be used."
                             )
             else:
                 recurse_note = "including subfolders" if self.recurse_var.get() else "top folder only"
-                label = "KVS/KOVS containers" if self.action_var.get() == "decrypt" else "OGG files"
+                label = "KVS/KOVS/KNO containers" if self.action_var.get() == "decrypt" else "OGG files"
                 self.input_hint_var.set(
                     f"{path.name}: ready for batch processing. Matching {label} will be discovered in the worker thread ({recurse_note}) when you press Start."
                 )
@@ -1115,7 +1502,7 @@ class KVSToolApp:
             raise ValueError("Pick an input file or folder first.")
         input_path = Path(input_text)
         if not input_path.exists():
-            raise ValueError("The chosen input path does not exist.")
+            raise ValueError("The chosen input path doesnt exist.")
         output_text = self.output_var.get().strip()
         output_path = Path(output_text) if output_text else None
         if output_path:
@@ -1125,13 +1512,13 @@ class KVSToolApp:
         if self.mode_var.get() == "folder" and not input_path.is_dir():
             raise ValueError("Folder batch mode needs a folder, not a file.")
         if self.mode_var.get() == "single":
-            if self.action_var.get() == "decrypt" and input_path.suffix.lower() not in {".kvs", ".kovs"}:
-                raise ValueError("Decrypt mode expects a .kvs or .kovs file.")
+            if self.action_var.get() == "decrypt" and input_path.suffix.lower() not in CONTAINER_EXTENSIONS:
+                raise ValueError("Decrypt mode expects a .kvs, .kovs, .kno or .ktss file.")
             if self.action_var.get() == "encrypt":
                 if input_path.suffix.lower() != ".ogg":
                     raise ValueError("Encrypt mode expects a decrypted .ogg file.")
                 if not looks_like_ogg(read_prefix(input_path, 4)):
-                    raise ValueError("The selected file does not start with OggS. Pick the decrypted .ogg file, not the .kvs container.")
+                    raise ValueError("The selected file doesnt start with OggS. Pick the decrypted .ogg file, not the .kvs/.kno container.")
         if self.action_var.get() == "encrypt":
             default_loop_start = parse_int(self.loop_start_var.get(), "Loop start samples")
             default_loop_end = parse_int(self.loop_end_var.get(), "Loop end samples")
@@ -1156,7 +1543,7 @@ class KVSToolApp:
         try:
             config = self.build_config()
         except Exception as exc:
-            messagebox.showerror("Cannot start conversion", str(exc), parent=self.root)
+            messagebox.showerror("cant start conversion", str(exc), parent=self.root)
             return
 
         self.cancel_event = threading.Event()
@@ -1195,9 +1582,9 @@ class KVSToolApp:
                     return
                 try:
                     if config.action == "decrypt":
-                        _outputs, note = decrypt_file(source, config.output_path, config.write_sidecar)
+                        outputs, note = decrypt_file(source, config.output_path, config.write_sidecar)
                     else:
-                        _outputs, note = encrypt_file(
+                        outputs, note = encrypt_file(
                             source,
                             config.output_path,
                             config.prefer_sidecar,
@@ -1238,7 +1625,7 @@ class KVSToolApp:
                 noun = "container" if action == "decrypt" else "OGG"
                 plural = "" if total == 1 else "s"
                 self.progress.set(0.0, f"Found {total} {noun}{plural}. Processing")
-                self.pending_log_lines.append((f"Worker found {total} matching file(s).", "muted"))
+                self.pending_log_lines.append((f"Worker found {total} matching files.", "muted"))
                 self.flush_pending_logs(force=True)
             elif kind == "progress":
                 _, index, total, label = event
@@ -1272,8 +1659,8 @@ class KVSToolApp:
                 self.flush_pending_logs(force=True)
                 self.set_busy(False)
                 self.status_var.set("Cancelled")
-                self.progress.set(0.0, f"Stopped after {successes + failures}/{total} file(s)")
-                self.append_log(f"Job cancelled. Completed {successes} file(s), {failures} failed before stop.", "warn")
+                self.progress.set(0.0, f"Stopped after {successes + failures}/{total} files")
+                self.append_log(f"Job cancelled. Completed {successes} files, {failures} failed before stop.", "warn")
                 self.worker = None
             elif kind == "fatal":
                 _, details = event
@@ -1300,12 +1687,10 @@ class KVSToolApp:
             self.cancel_event.set()
         self.root.destroy()
 
-
 def main():
     root = tk.Tk()
     KVSToolApp(root)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
