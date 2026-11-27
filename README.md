@@ -4,7 +4,7 @@ This repository will hold modding software I build to be used for PC Koei Tecmo,
 
 # Requirements to use my tools
 
-Only a Python 3 installation, if a tool needs something like Pillow (python imaging library) then the tool's section will say it in the readme.
+Only a Python 3 installation (for now, I'm working on converting all of my Kybernes Tools to C and Dart so that python isn't needed anymore), if a tool needs something like Pillow (python imaging library) then the tool's section will say it in the readme.
 
 # Harklight, KVS Audio Tool
 
